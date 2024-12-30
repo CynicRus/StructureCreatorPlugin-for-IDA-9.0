@@ -2,10 +2,10 @@
 
 Just the simple IDA 9.0 plugin for easy structure creation tasks. 
 
-#Installation
+# Installation
 Just place the StructureCreationPlugin to the plugins folder of your ida installation
 
-#How to use
+# How to use
 Ctrl + Alt + S or Edit->Plugins->StructureCreation
 
-#Enjoy!
+# Enjoy!
