@@ -32,10 +32,45 @@ def get_struc(struct_tid):
         if tif.is_struct():
             return tif
     return ida_idaapi.BADADDR
+    
+def remove_comments(text):
+    # Remove single-line comments
+    lines = text.split('\n')
+    processed_lines = []
+    for line in lines:
+        comment_pos = line.find('//')
+        if comment_pos != -1:
+            line = line[:comment_pos].rstrip()
+        if line:
+            processed_lines.append(line)
+    return '\n'.join(processed_lines)
 
-def remove_semicolons(text):
-    # Remove semicolons from the text
-    return text.replace(';', '')
+def process_structure_definition(text):
+    # Add semicolons to structure fields
+    lines = text.split('\n')
+    processed_lines = []
+    in_struct = False
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            processed_lines.append('')
+            continue
+            
+        if '{' in line:
+            in_struct = True
+            processed_lines.append(line)
+        elif '}' in line:
+            in_struct = False
+            processed_lines.append(line)
+        elif in_struct and line and not line.endswith(';'):
+            if not any(char in line for char in ['{', '}', ';']):
+                line += ';'
+            processed_lines.append(line)
+        else:
+            processed_lines.append(line)
+            
+    return '\n'.join(processed_lines)
 
 def split_multiple_structures(text):
     # Split text into separate structures based on empty lines
@@ -87,9 +122,10 @@ def create_or_edit_structure():
     
     try:
         til = ida_typeinf.get_idati()
-        
+        # Remove comments
+        struct_def = remove_comments(struct_def)
         # Remove semicolons from the structure definition
-        struct_def = remove_semicolons(struct_def)
+        struct_def = process_structure_definition(struct_def)
         
         # Split into multiple structures if present
         structures = split_multiple_structures(struct_def)
