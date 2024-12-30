@@ -1,0 +1,1 @@
+# StructureCreatorPlugin-for-IDA-9.0
