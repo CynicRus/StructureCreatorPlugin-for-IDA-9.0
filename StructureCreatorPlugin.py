@@ -13,9 +13,11 @@ Create/Edit Structure
 <Structure definition:{text}>
 """,
             {
-                'text': F.MultiLineTextControl(text=struct_def, width=80, flags=ida_kernwin.Form.MultiLineTextControl.TXTF_FIXEDFONT)
+                'text': F.MultiLineTextControl(text=struct_def, width=120, flags=ida_kernwin.Form.MultiLineTextControl.TXTF_FIXEDFONT)
             }
         )
+        
+        
 def get_tid(ea):
     # Gets type id by ea 
     tif = ida_typeinf.tinfo_t()
@@ -46,7 +48,7 @@ def remove_comments(text):
     return '\n'.join(processed_lines)
 
 def process_structure_definition(text):
-    # Add semicolons to structure fields
+    # Add semicolons to structure fields and after closing braces
     lines = text.split('\n')
     processed_lines = []
     in_struct = False
@@ -62,6 +64,9 @@ def process_structure_definition(text):
             processed_lines.append(line)
         elif '}' in line:
             in_struct = False
+            # Add semicolon after closing brace if it's missing
+            if not line.endswith(';'):
+                line += ';'
             processed_lines.append(line)
         elif in_struct and line and not line.endswith(';'):
             if not any(char in line for char in ['{', '}', ';']):
@@ -102,7 +107,6 @@ def create_or_edit_structure():
         tinfo = get_struc(tid)
         if tinfo != ida_idaapi.BADADDR:
             # If cursor is on an existing structure, get its definition
-            current_struct_name = tinfo.get_type_name()
             current_struct_def = idaapi.print_tinfo(None, tinfo, '', idaapi.PRTYPE_MULTI | idaapi.PRTYPE_TYPE)
 
     # Create and show form
